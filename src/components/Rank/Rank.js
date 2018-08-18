@@ -1,28 +1,16 @@
 import React, { Component } from "react";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import {
+    getRankBy,
+    getRankOrder,
+    actions as summaryActions
+} from "../../redux/modules/summary";
 import { Row, Col, Progress, Radio, Icon } from "antd";
 
 const RadioGroup = Radio.Group;
 
-let originData;
-
 class Rank extends Component {
-    state = {
-        data: [],
-        rankName: "",
-        order: 1
-    };
-
-    componentDidMount() {
-        originData = this.props.data;
-        let mapData = this.handleMapping(originData, "passed");
-        let sortedData = this.handleSort(
-            mapData,
-            this.sortPercent,
-            this.state.order
-        );
-        this.setState({ data: sortedData, rankName: "passed" });
-    }
-
     handleSort = (data, sortby, order) => {
         let sortedData = data.sort(sortby);
         if (order > 0) {
@@ -36,20 +24,11 @@ class Rank extends Component {
     };
 
     onChangeName = e => {
-        let mapData = this.handleMapping(originData, e.target.value);
-        let sortedData = this.handleSort(
-            mapData,
-            this.sortPercent,
-            this.state.order
-        );
-        this.setState({ data: sortedData, rankName: e.target.value });
+        this.props.changeRankBy(e.target.value);
     };
 
     onChangeOrder = () => {
-        let newOrder = -this.state.order;
-        let mapData = this.handleMapping(originData, this.state.rankName);
-        let sortedData = this.handleSort(mapData, this.sortPercent, newOrder);
-        this.setState({ data: sortedData, order: newOrder });
+        this.props.changeRankOrder(-this.props.rankOrder);
     };
 
     handleMapping = (data, rankName) => {
@@ -68,8 +47,17 @@ class Rank extends Component {
 
     render() {
         let rank = null;
-        if (this.state.data.length !== 0) {
-            rank = this.state.data.map(ele => {
+        if (this.props.data.length !== 0) {
+            let mappedData = this.handleMapping(
+                this.props.data,
+                this.props.rankBy
+            );
+            let sortedData = this.handleSort(
+                mappedData,
+                this.sortPercent,
+                this.props.rankOrder
+            );
+            rank = sortedData.map(ele => {
                 return (
                     <Row key={ele.testName} style={{ marginTop: "1em" }}>
                         <Col
@@ -93,14 +81,16 @@ class Rank extends Component {
             <div>
                 <RadioGroup
                     onChange={this.onChangeName}
-                    value={this.state.rankName}
+                    value={this.props.rankBy}
                 >
                     <Radio value="passed">Passed</Radio>
                     <Radio value="failed">Failed</Radio>
                     <Radio value="ignored">Ignored</Radio>
                 </RadioGroup>
                 <Icon
-                    type={this.state.order > 0 ? "down-circle" : "up-circle"}
+                    type={
+                        this.props.rankOrder > 0 ? "down-circle" : "up-circle"
+                    }
                     onClick={this.onChangeOrder}
                 />
                 {rank}
@@ -109,4 +99,20 @@ class Rank extends Component {
     }
 }
 
-export default Rank;
+const mapStateToProps = (state, props) => {
+    return {
+        rankBy: getRankBy(state),
+        rankOrder: getRankOrder(state)
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        ...bindActionCreators(summaryActions, dispatch)
+    };
+};
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Rank);

@@ -2,21 +2,25 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import "./index.css";
-import App from "./App";
-import Login from "./components/Login/Login";
-import Logon from "./components/Logon/Logon";
+import App from "./containers/App/App";
+import Login from "./containers/Login/Login";
+import Logon from "./containers/Logon/Logon";
 import registerServiceWorker from "./registerServiceWorker";
+import { Provider } from "react-redux";
+import configureStore from "./redux/configureStore";
+
+const store = configureStore();
 
 ReactDOM.render(
-    <BrowserRouter>
-        <div>
+    <Provider store={store}>
+        <BrowserRouter>
             <Switch>
                 <Route path="/login" component={Login} />
                 <Route path="/logon" component={Logon} />
                 <Route path="/" component={App} />
             </Switch>
-        </div>
-    </BrowserRouter>,
+        </BrowserRouter>
+    </Provider>,
     document.getElementById("root")
 );
 registerServiceWorker();

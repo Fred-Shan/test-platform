@@ -29,11 +29,11 @@ function Sidebar(props) {
                 <span>Home</span>
             </Menu.Item>
             <SubMenu
-                key="auto"
+                key="func"
                 title={
                     <span>
                         <Icon type="area-chart" />
-                        <span>Automation Test</span>
+                        <span>Functional Test</span>
                     </span>
                 }
             >

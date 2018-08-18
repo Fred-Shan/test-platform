@@ -1,45 +1,33 @@
 import React from "react";
 import { Form, Icon, Input, Button, Checkbox } from "antd";
 import { withRouter } from "react-router-dom";
+import { connect } from "react-redux";
+import {
+    actions as authActions,
+    isLoginFailed
+} from "../../redux/modules/auth";
+import { getLoggedStatus } from "../../redux/modules/auth";
+import { bindActionCreators } from "redux";
 import "./Login.css";
 
 const FormItem = Form.Item;
 
 class Login extends React.Component {
-    state = {
-        showWarning: false
-    };
     handleSubmit = e => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log("Received values of form: ", values);
-                //139.24.217.56:8081
-                fetch("http://139.24.217.56:8081/api/formlogin", {
-                    method: "POST",
-                    credentials: "include",
-                    body: JSON.stringify({
-                        username: values.userName,
-                        password: values.password
-                    }),
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                })
-                    .then(res => res.json())
-                    .then(response => {
-                        if (response.code === "0") {
-                            this.props.history.push("/home");
-                        } else {
-                            this.setState({ showWarning: true });
-                        }
-                    });
-
-                // document.cookie = "JSESSIONID=001";
-                // this.props.history.push("/home");
+                this.props.login(values.userName, values.password);
             }
         });
     };
+
+    componentDidUpdate() {
+        if (this.props.isLogin) {
+            this.props.history.push("/home");
+        }
+    }
 
     gotoLogon = e => {
         e.preventDefault();
@@ -51,7 +39,7 @@ class Login extends React.Component {
         const { getFieldDecorator } = this.props.form;
         return (
             <Form onSubmit={this.handleSubmit} className="login-form">
-                {this.state.showWarning ? (
+                {this.props.loginFailed ? (
                     <div style={{ color: "red" }}>
                         Invalid username or password!
                     </div>
@@ -122,4 +110,20 @@ class Login extends React.Component {
     }
 }
 
-export default withRouter(Form.create()(Login));
+const mapStateToProps = (state, props) => {
+    return {
+        isLogin: getLoggedStatus(state),
+        loginFailed: isLoginFailed(state)
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        ...bindActionCreators(authActions, dispatch)
+    };
+};
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(withRouter(Form.create()(Login)));

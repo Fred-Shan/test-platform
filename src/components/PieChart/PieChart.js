@@ -3,17 +3,8 @@ import echarts from "echarts";
 import { Row, Col } from "antd";
 
 class PieChart extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            data: this.props.data.sort((a, b) => {
-                return new Date(b.timestamp) - new Date(a.timestamp);
-            })
-        };
-    }
-
-    componentDidMount() {
-        this.state.data.forEach(ele => this.drawChart(ele));
+    componentDidUpdate() {
+        this.props.data.forEach(ele => this.drawChart(ele));
     }
 
     drawChart = data => {
@@ -51,8 +42,11 @@ class PieChart extends Component {
 
     render() {
         let columns = null;
-        if (this.state.data.length !== 0) {
-            columns = this.state.data.map(ele => {
+        if (this.props.data.length !== 0) {
+            let sortedData = this.props.data.sort((a, b) => {
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+            columns = sortedData.map(ele => {
                 return (
                     <Col
                         span={8}

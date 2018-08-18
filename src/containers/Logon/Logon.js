@@ -16,11 +16,12 @@ class Logon extends Component {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
                 console.log("Received values of form: ", values);
-                fetch("http://139.24.217.56:8081/api/registration", {
+                //139.24.217.56
+                fetch("http://localhost:8081/api/registration", {
                     method: "POST",
                     credentials: "include",
                     body: JSON.stringify({
-                        username: values.userName,
+                        username: values.username,
                         password: values.password
                     }),
                     headers: {
