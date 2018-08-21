@@ -62,7 +62,11 @@ class Rank extends Component {
                     <Row key={ele.testName} style={{ marginTop: "1em" }}>
                         <Col
                             span={5}
-                            style={{ textAlign: "right", marginRight: "1em" }}
+                            style={{
+                                textAlign: "right",
+                                marginRight: "1em",
+                                wordWrap: "break-word"
+                            }}
                         >
                             {ele.testName}
                         </Col>
@@ -78,7 +82,7 @@ class Rank extends Component {
             });
         }
         return (
-            <div>
+            <div style={{ textAlign: "center" }}>
                 <RadioGroup
                     onChange={this.onChangeName}
                     value={this.props.rankBy}
@@ -93,7 +97,7 @@ class Rank extends Component {
                     }
                     onClick={this.onChangeOrder}
                 />
-                {rank}
+                <div style={{ overflow: "auto", height: "260px" }}>{rank}</div>
             </div>
         );
     }

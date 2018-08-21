@@ -1,10 +1,18 @@
 import React, { Component } from "react";
-import { Layout, Icon } from "antd";
+import { Layout, Icon, Button } from "antd";
 import { Switch, Route, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import { getLoggedUser, getLoggedStatus } from "../../redux/modules/auth";
+import {
+    getLoggedUser,
+    getLoggedStatus,
+    actions as authActions
+} from "../../redux/modules/auth";
+import {
+    getFuncNameList,
+    getPerformNameList,
+    actions as summaryActions
+} from "../../redux/modules/summary";
 import { isSiderCollapsed } from "../../redux/modules/ui";
-import { actions as authActions } from "../../redux/modules/auth";
 import { actions as uiActions } from "../../redux/modules/ui";
 import Sidebar from "../Sidebar/Sidebar";
 import Home from "../Home/Home";
@@ -21,13 +29,19 @@ const { Sider, Content, Header } = Layout;
 class App extends Component {
     componentDidMount() {
         this.props.checkLogin();
+        this.props.queryFuncNameList();
+    }
+
+    componentDidUpdate() {
+        !this.props.funcNameList && this.props.queryFuncNameList();
     }
 
     handleLogout = () => {
-        this.props.logout();
+        // this.props.logout();
         post(url.logout(), { username: this.props.username }).then(data =>
             console.log(data)
         );
+        window.location.href = "/login";
     };
 
     render() {
@@ -38,30 +52,43 @@ class App extends Component {
             return <Login />;
         }
         return (
-            <Layout style={{ minHeight: "100vh" }}>
+            <Layout style={{ height: "100vh" }}>
                 <Header>
                     <div
                         style={{
                             float: "right",
                             color: "white"
                         }}
-                        onClick={this.handleLogout}
                     >
                         <span>Welcome, {this.props.username}</span>
                         {/* <Icon type="logout" /> */}
-                        <span style={{ marginLeft: "1em", cursor: "pointer" }}>
+                        <Button
+                            type="primary"
+                            style={{ marginLeft: "1em" }}
+                            onClick={this.handleLogout}
+                        >
                             Log out
-                        </span>
+                        </Button>
                     </div>
                     <div style={{ color: "white" }}>Header</div>
                 </Header>
-                <Layout>
+                <Layout style={{ height: "100%" }}>
                     <Sider
                         collapsible
                         collapsed={this.props.siderCollapsed}
                         onCollapse={this.props.toggleSider}
+                        width={250}
+                        style={{
+                            overflow: "auto",
+                            height: "calc(100vh - 64px)"
+                        }}
                     >
-                        <Sidebar />
+                        <Sidebar
+                            data={{
+                                funcNameList: this.props.funcNameList,
+                                performNameList: this.props.performNameList
+                            }}
+                        />
                     </Sider>
                     <Content>
                         <Switch>
@@ -71,7 +98,7 @@ class App extends Component {
                                 render={() => <Redirect to="/home" />}
                             />
                             <Route exact path="/home" component={Home} />
-                            <Route path="/func" component={FuncTest} />
+                            <Route path="/func/:name" component={FuncTest} />
                             <Route path="/perform" component={PerformTest} />
                             <Route path="/create" component={CreateProject} />
                         </Switch>
@@ -86,14 +113,17 @@ const mapStateToProps = (state, props) => {
     return {
         username: getLoggedUser(state),
         siderCollapsed: isSiderCollapsed(state),
-        isLogin: getLoggedStatus(state)
+        isLogin: getLoggedStatus(state),
+        funcNameList: getFuncNameList(state),
+        performNameList: getPerformNameList(state)
     };
 };
 
 const mapDispatchToProps = dispatch => {
     return {
         ...bindActionCreators(authActions, dispatch),
-        ...bindActionCreators(uiActions, dispatch)
+        ...bindActionCreators(uiActions, dispatch),
+        ...bindActionCreators(summaryActions, dispatch)
     };
 };
 

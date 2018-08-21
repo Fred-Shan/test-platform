@@ -1,28 +1,41 @@
 import React from "react";
 import { Menu, Icon } from "antd";
 import { withRouter } from "react-router-dom";
+import "./Sidebar.css";
 
 const { SubMenu } = Menu;
 
 function Sidebar(props) {
-    const handleClickItem = ({ item, key, keyPath }) => {
-        let path =
-            keyPath.length === 2
-                ? `/${keyPath[1]}/${keyPath[0]}`
-                : `/${keyPath[0]}`;
+    const handleClickItem = ({ keyPath }) => {
+        let path = resolveKeyPathToUrlPath(keyPath);
         props.history.push(path);
-        console.log(props);
-        console.log(item);
-        console.log(key);
-        console.log(keyPath);
+    };
+
+    const resolveKeyPathToUrlPath = keyPath => {
+        return keyPath.length === 2
+            ? `/${keyPath[1]}/${keyPath[0]}`
+            : `/${keyPath[0]}`;
+    };
+
+    const resolveUrlPathToKeyPath = () => {
+        let arr = props.history.location.pathname.split("/");
+        console.log(arr);
+        //当url的path为空时，使其默认选中Home页，因为Menu组件的defaultSelectedKeys好像只能被赋值一次
+        if (arr[0] === "" && arr[1] === "") {
+            return ["home"];
+        }
+
+        return arr.length === 2 ? [arr[1]] : [arr[2], arr[1]];
     };
 
     return (
         <Menu
-            defaultSelectedKeys={["home"]}
+            defaultSelectedKeys={resolveUrlPathToKeyPath()}
+            defaultOpenKeys={resolveUrlPathToKeyPath()}
             mode="inline"
             theme="dark"
             onClick={handleClickItem}
+            style={{ marginBottom: "48px" }}
         >
             <Menu.Item key="home">
                 <Icon type="home" />
@@ -37,14 +50,25 @@ function Sidebar(props) {
                     </span>
                 }
             >
-                <Menu.Item key="core">Core</Menu.Item>
-                <Menu.Item key="connection">Connection</Menu.Item>
-                <Menu.Item key="iot">IoT</Menu.Item>
+                {props.data.funcNameList
+                    ? props.data.funcNameList.map(ele => (
+                          <Menu.Item key={ele}>{ele}</Menu.Item>
+                      ))
+                    : null}
             </SubMenu>
-            <Menu.Item key="perform">
-                <Icon type="dashboard" />
-                <span>Performance Test</span>
-            </Menu.Item>
+            <SubMenu
+                key="perform"
+                title={
+                    <span>
+                        <Icon type="dashboard" />
+                        <span>Performance Test</span>
+                    </span>
+                }
+            >
+                {props.data.performNameList.map(ele => (
+                    <Menu.Item key={ele}>{ele}</Menu.Item>
+                ))}
+            </SubMenu>
             <Menu.Item key="create">
                 <Icon type="cloud-download" />
                 <span>Create Test Project</span>

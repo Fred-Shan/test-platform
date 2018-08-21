@@ -24,11 +24,24 @@ class PieChart extends Component {
                     radius: "55%",
                     center: ["50%", "50%"],
                     data: [
-                        { value: data.passed, name: "passed" },
-                        { value: data.failed, name: "failed" },
-                        { value: data.ignored, name: "ignored" }
+                        {
+                            value: data.passed,
+                            name: "passed",
+                            itemStyle: { color: "#52c41a" }
+                        },
+                        {
+                            value: data.failed,
+                            name: "failed",
+                            itemStyle: { color: "#f5222d" }
+                        },
+                        {
+                            value: data.ignored,
+                            name: "ignored",
+                            itemStyle: { color: "#bfbfbf" }
+                        }
                     ],
                     itemStyle: {
+                        color: "green",
                         emphasis: {
                             shadowBlur: 10,
                             shadowOffsetX: 0,

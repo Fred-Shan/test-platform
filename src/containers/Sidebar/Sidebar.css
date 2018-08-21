@@ -1,0 +1,4 @@
+.ant-menu-submenu-popup {
+    max-height: 100vh;
+    overflow: auto;
+}
