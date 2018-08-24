@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import echarts from "echarts";
 import { Row, Col, DatePicker } from "antd";
-import dayjs from "dayjs";
+import moment from "moment";
 
 const { RangePicker } = DatePicker;
 
@@ -10,7 +10,19 @@ class History extends Component {
         this.drawChart(this.props.data);
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        if (
+            this.props.data === nextProps.data &&
+            this.props.range.from === nextProps.range.from &&
+            this.props.range.to === nextProps.range.to
+        ) {
+            return false;
+        }
+        return true;
+    }
+
     componentDidUpdate() {
+        console.log("update history");
         this.drawChart(this.props.data);
     }
 
@@ -38,7 +50,7 @@ class History extends Component {
                 type: "category",
                 boundaryGap: false,
                 data: data.map(ele =>
-                    dayjs(ele.timestamp).format("MM/DD HH:mm:ss")
+                    moment(ele.timestamp).format("MM/DD HH:mm:ss")
                 )
             },
             yAxis: {
@@ -66,20 +78,24 @@ class History extends Component {
             ]
         });
 
+        myChart.off("click");
         myChart.on("click", params => {
             if (params.componentType === "series") {
-                console.log(data[params.seriesIndex]);
+                console.log(data[params.dataIndex]);
+                this.props.jumpToOverview(
+                    data[params.dataIndex].testName,
+                    data[params.dataIndex].timestamp
+                );
             }
         });
     };
 
     onChange = (value, dateString) => {
-        console.log("Selected Time: ", value);
-        console.log("Formatted Selected Time: ", dateString);
+        this.props.setRange(value[0].toISOString(), value[1].toISOString());
     };
 
     onOk = value => {
-        console.log("onOk: ", value);
+        this.props.submit();
     };
 
     render() {
@@ -88,6 +104,11 @@ class History extends Component {
                 <Row>
                     <Col span={24} style={{ paddingLeft: "2em" }}>
                         <RangePicker
+                            value={[
+                                moment(this.props.range.from),
+                                moment(this.props.range.to)
+                            ]}
+                            allowClear={false}
                             showTime={{ format: "HH:mm" }}
                             format="YYYY-MM-DD HH:mm"
                             placeholder={["Start Time", "End Time"]}

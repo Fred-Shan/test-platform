@@ -41,7 +41,6 @@ class PieChart extends Component {
                         }
                     ],
                     itemStyle: {
-                        color: "green",
                         emphasis: {
                             shadowBlur: 10,
                             shadowOffsetX: 0,

@@ -38,11 +38,19 @@ function Cases(props) {
         });
     }
 
+    const showTotal = (total, range) => {
+        return `Total ${total} items`;
+    };
+
     return (
         <Table
             columns={columns}
             dataSource={data}
-            pagination={{ pageSize: 20 }}
+            pagination={{
+                pageSize: 20,
+                showSizeChanger: true,
+                showTotal: showTotal
+            }}
         />
     );
 }

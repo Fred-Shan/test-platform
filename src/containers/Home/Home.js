@@ -8,27 +8,34 @@ import {
     queryFuncLatestList,
     actions as summaryActions
 } from "../../redux/modules/summary";
+import { getLoggedUser } from "../../redux/modules/auth";
 
 let ws;
 
 class Home extends Component {
     componentDidMount() {
         this.props.queryFuncLatestList();
-        // ws = new WebSocket("ws://139.24.217.56:8081/websocket/homepage");
-        // ws.onopen = e => {
-        //     console.log("ws connnection open ...");
-        //     ws.send("You are my angel. --From queen");
-        // };
-        // ws.onmessage = e => {
-        //     this.setState({ message: e.data });
-        // };
-        // ws.onclose = e => {
-        //     console.log("connection closed.");
-        // };
+        ws = new WebSocket(
+            "ws://139.24.217.56:8081/websocket/homepage/" + this.props.userName
+        );
+        ws.onopen = e => {
+            console.log("ws connnection open ...");
+            ws.send("Hello, angel!");
+        };
+        ws.onmessage = e => {
+            console.log(e.data);
+            let data = JSON.parse(e.data);
+            if (typeof data === "object" && data.testName) {
+                this.props.setFuncLatestList(data);
+            }
+        };
+        ws.onclose = e => {
+            console.log("ws connection closed.");
+        };
     }
 
     componentWillUnmount() {
-        // ws.close();
+        ws.close();
     }
 
     render() {
@@ -72,7 +79,8 @@ class Home extends Component {
 
 const mapStateToProps = (state, props) => {
     return {
-        funcLatestList: queryFuncLatestList(state)
+        funcLatestList: queryFuncLatestList(state),
+        userName: getLoggedUser(state)
     };
 };
 

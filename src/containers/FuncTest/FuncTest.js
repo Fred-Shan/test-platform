@@ -2,19 +2,24 @@ import React, { Component } from "react";
 import { Tabs } from "antd";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import dayjs from "dayjs";
+import moment from "moment";
 import {
     queryFuncLatestList,
     getFuncLatestSingle,
+    getFuncHistorySingle,
     queryFuncHistoryList,
+    getFuncHistoryRange,
+    setFuncHistoryRange,
     actions as summaryActions
 } from "../../redux/modules/summary";
 import {
     isLatestFuncResults,
     getFuncLatestFailed,
+    getFuncHistoryFailed,
     getTestCaseList,
     actions as resultsActions
 } from "../../redux/modules/results";
+import { getFuncTabKey, actions as uiActions } from "../../redux/modules/ui";
 import Overview from "./Overview/Overview";
 import History from "./History/History";
 import Cases from "./Cases/Cases";
@@ -39,11 +44,11 @@ class FuncTest extends Component {
 
         this.props.queryFuncHistoryList(
             this.props.match.params.name,
-            dayjs()
-                .subtract(1, "month")
+            moment()
+                .subtract(1, "months")
                 .toISOString(),
-            dayjs().toISOString(),
-            100
+            moment().toISOString(),
+            2000
         );
     }
 
@@ -65,11 +70,11 @@ class FuncTest extends Component {
 
             nextProps.queryFuncHistoryList(
                 nextProps.match.params.name,
-                dayjs()
-                    .subtract(1, "month")
+                moment()
+                    .subtract(1, "months")
                     .toISOString(),
-                dayjs().toISOString(),
-                100
+                moment().toISOString(),
+                2000
             );
         }
     }
@@ -101,6 +106,7 @@ class FuncTest extends Component {
     // }
 
     callback = key => {
+        this.props.switchFuncTab(key);
         if (key === "3") {
             !this.props.testCaseList &&
                 this.props.queryTestCaseList(this.props.match.params.name);
@@ -110,19 +116,49 @@ class FuncTest extends Component {
     render() {
         return (
             <Tabs
-                defaultActiveKey="1"
+                activeKey={this.props.activeKey}
                 onChange={this.callback}
                 style={{ margin: "1em", marginTop: 0 }}
             >
                 <TabPane tab="Overview" key="1">
                     <Overview
-                        overviewData={this.props.funcLatestSingle}
+                        overviewData={
+                            this.props.isLatestFuncResults
+                                ? this.props.funcLatestSingle
+                                : this.props.funcHistorySingle
+                        }
                         isLatestFunc={this.props.isLatestFuncResults}
-                        failedData={this.props.funcLatestFailed}
+                        failedData={
+                            this.props.isLatestFuncResults
+                                ? this.props.funcLatestFailed
+                                : this.props.funcHistoryFailed
+                        }
                     />
                 </TabPane>
                 <TabPane tab="History" key="2">
-                    <History data={this.props.funcHistoryList} />
+                    <History
+                        data={this.props.funcHistoryList}
+                        range={this.props.range}
+                        setRange={this.props.setFuncHistoryRange}
+                        submit={this.props.queryFuncHistoryList.bind(
+                            null,
+                            this.props.match.params.name,
+                            moment(this.props.range.from).toISOString(),
+                            moment(this.props.range.to).toISOString(),
+                            2000
+                        )}
+                        jumpToOverview={(testName, timestamp) => {
+                            this.props.switchFuncTab("1");
+                            this.props.queryFuncHistorySingle(
+                                testName,
+                                timestamp
+                            );
+                            this.props.queryFuncHistoryFailed(
+                                testName,
+                                timestamp
+                            );
+                        }}
+                    />
                 </TabPane>
                 <TabPane tab="Cases" key="3">
                     <Cases data={this.props.testCaseList} />
@@ -136,17 +172,22 @@ const mapStateToProps = (state, props) => {
     return {
         funcLatestList: queryFuncLatestList(state),
         funcLatestSingle: getFuncLatestSingle(state),
+        funcHistorySingle: getFuncHistorySingle(state),
         isLatestFuncResults: isLatestFuncResults(state),
         funcLatestFailed: getFuncLatestFailed(state),
+        funcHistoryFailed: getFuncHistoryFailed(state),
         testCaseList: getTestCaseList(state),
-        funcHistoryList: queryFuncHistoryList(state)
+        funcHistoryList: queryFuncHistoryList(state),
+        range: getFuncHistoryRange(state),
+        activeKey: getFuncTabKey(state)
     };
 };
 
 const mapDispatchToProps = dispatch => {
     return {
         ...bindActionCreators(summaryActions, dispatch),
-        ...bindActionCreators(resultsActions, dispatch)
+        ...bindActionCreators(resultsActions, dispatch),
+        ...bindActionCreators(uiActions, dispatch)
     };
 };
 

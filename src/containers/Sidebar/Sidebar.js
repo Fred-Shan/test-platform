@@ -19,7 +19,6 @@ function Sidebar(props) {
 
     const resolveUrlPathToKeyPath = () => {
         let arr = props.history.location.pathname.split("/");
-        console.log(arr);
         //当url的path为空时，使其默认选中Home页，因为Menu组件的defaultSelectedKeys好像只能被赋值一次
         if (arr[0] === "" && arr[1] === "") {
             return ["home"];

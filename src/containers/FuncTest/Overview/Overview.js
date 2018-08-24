@@ -91,12 +91,22 @@ function Overview(props) {
         FailedTabledata = failedData;
     }
 
+    const showTotal = (total, range) => {
+        return `Total ${total} items`;
+    };
+
     return (
         <div>
             <Card
                 title="Overview"
                 extra={
-                    <span>{props.isLatestFunc ? "Latest" : "Not Latest"}</span>
+                    <span
+                        style={{
+                            color: props.isLatestFunc ? "#52c41a" : "#f5222d"
+                        }}
+                    >
+                        {props.isLatestFunc ? "Latest" : "Not Latest"}
+                    </span>
                 }
             >
                 <Table
@@ -109,7 +119,11 @@ function Overview(props) {
                 <Table
                     columns={FailedTablecolumns}
                     dataSource={FailedTabledata}
-                    pagination={{ pageSize: 5 }}
+                    pagination={{
+                        pageSize: 20,
+                        showSizeChanger: true,
+                        showTotal: showTotal
+                    }}
                 />
             </Card>
         </div>

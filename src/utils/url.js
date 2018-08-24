@@ -13,7 +13,9 @@ const url = {
     funcLatestFailed: () => host + "/api/functionalLatestFailedTestResults",
     testCaseList: () => host + "/api/testCaseList",
     functionalHistoryTestSummaryList: () =>
-        host + "/api/functionalHistoryTestSummaryList"
+        host + "/api/functionalHistoryTestSummaryList",
+    funcHistorySummarySingle: () => host + "/api/functionalHistoryTestSummary",
+    funcHistoryFailed: () => host + "/api/functionalHistoryFailedTestResults"
 };
 
 export default url;
